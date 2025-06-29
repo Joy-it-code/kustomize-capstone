@@ -1,8 +1,19 @@
 # Implementing a Multi-Environment Application Deployment with Kustomize
 
 
-> This project demonstrates how to deploy a Kubernetes-based web application using **Kustomize** with environment-specific overlays for **development**, **staging**, and **production**. It also includes a **GitHub Actions CI/CD pipeline** that automatically applies changes to a Kubernetes cluster.
+> This project demonstrates the use of **Kustomize** for managing Kubernetes deployments across multiple environments (`dev`, `staging`, and `prod`). It is designed to be deployed to an **Amazon EKS cluster** using `kubectl` and integrates configuration and secrets management via `ConfigMaps` and `Secrets`.
 
+
+
+## Prerequisites
+
+- VS Code
+- Git
+- kubectl
+- Kustomize
+- AWS CLI
+
+----
 
 ## Project Structure
 
@@ -19,14 +30,17 @@ kustomize-capstone/
 `-- overlays
     |-- dev
     |   |-- kustomization.yaml
-    |   `-- patch-deployment.yaml
+    |   `-- patch.yaml
     |-- prod
     |   |-- kustomization.yaml
-    |   `-- patch-deployment.yaml
+    |   `-- patch.yaml
     `-- staging
         |-- kustomization.yaml
-        `-- patch-deployment.yaml
+        `-- patch.yaml
 ```
+
+
+----
 
 ## Kustomize Overview
 
@@ -40,6 +54,7 @@ kustomize-capstone/
   - `secretGenerator`
   - `commonLabels`
 
+----
 
 ## Step 1: Project Set Up 
 
@@ -76,6 +91,8 @@ echo "node_modules/
 git add .
 git commit -m "Initial project setup"
 ```
+
+----
 
 ## Step 3: Define Base Configuration
 
@@ -139,6 +156,9 @@ resources:
   - deployment.yaml
   - service.yaml
 ```
+
+----
+
 
 ## Step 4: Create Environment-Specific Overlays
 
@@ -271,6 +291,8 @@ spec:
             memory: "512Mi"
 ```
 
+----
+
 
 ## Step 5: Set Up AWS EKS and CI/CD Pipeline with GitHub Actions
 
@@ -351,6 +373,8 @@ jobs:
    - Go to your GitHub repo → Settings → Secrets → Actions.
    - Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from your AWS account.
 
+
+----
 
 
 ## Step 6: - Test the CI/CD Pipeline
@@ -435,6 +459,7 @@ kubectl get pods -n prod
 
 
 
+----
 
 ## Task 7: Manage Secrets and ConfigMaps
 
@@ -464,11 +489,21 @@ data:
   API_KEY: YXBpLWtleS1leGFtcGxlCg==
 ```
 
+commonLabels:
+  app: my-app
+
 
 #### Update `base/kustomization.yaml`:
 ```bash
-- configmap.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
   - secret.yaml
+commonLabels:
+  app: my-app
 ```
 
 #### Update `base/deployment.yaml` to use ConfigMap and Secret:
@@ -595,3 +630,87 @@ kubectl get pods -n prod
 kubectl get svc -n prod
 ```
 ![](./img/3c.pod.for.prod.png)
+
+
+## Check and Push to GitHub
+```bash
+git add .
+git commit -m "Update to labels syntax"
+git push origin main
+```
+
+
+## Check the GitHub Actions Workflow
+- Check github actions for the latest “Deploy to EKS” run.
+- Check logs for “Deploy to EKS (Staging)” and “(Prod)” steps.
+![](./img/4a.deployed.eks.last.png)
+
+----
+
+## Step 8: Clean Up
+
+- Delete resources
+```bash
+kubectl delete -k overlays/dev --namespace dev
+kubectl delete -k overlays/staging --namespace staging
+kubectl delete -k overlays/prod --namespace prod
+```
+
+
+- Delete EKS Cluster:
+```bash
+eksctl delete cluster --name my-kustomize-cluster --region us-east-1
+```
+
+----
+
+## Report: Implementation Strategy & Challenges
+
+### Strategy
+
+- I used Kustomize to separate base configuration from environment overlays.
+
+- Created overlays for dev, staging, and prod, each with custom replica counts and configs.
+
+- Integrated GitHub Actions for automated deployment on push.
+
+- Tested locally using Minikube and kubectl apply -k.
+
+
+## Challenges Faced and Solution
+
+1. **Kustomize Parsing Errors:** I Switched to the working commonLabels syntax when the modern labels format caused issues, and tested with kubectl kustomize until resolved.
+
+2. **Immutable Selector Issue:** I adjusted commonLabels to match the existing `app: my-app` selector, avoiding changes to `spec.selector ` and enabling a non-destructive update with `kubectl apply`.
+
+
+## Outcome
+
+- Full multi-environment configuration using Kustomize.
+
+- Clean and reusable base Kubernetes definitions.
+
+- CI/CD pipeline logic ready for real-world cloud deployment (e.g., EKS).
+
+
+----
+
+
+## Conclusion
+
+This project demonstrates a reliable and scalable method for managing Kubernetes deployments using Kustomize and GitHub Actions. By separating base configurations from environment-specific overlays, and automating deployment through CI/CD, it follows modern DevOps best practices. The solution is adaptable to both local and cloud-based environments, supporting maintainable and efficient infrastructure management.
+
+
+
+## Push to Github
+```
+git add .
+git commit -m "update file"
+git push
+```
+
+### Author
+
+### Joy Nwatuzor
+**GitHub: Joy-it-code**
+**Capstone Project – DevOps Journey**
