@@ -506,7 +506,7 @@ resources:
   - service.yaml
   - configmap.yaml
   - secret.yaml
-commonLabels:
+labels:
   app.kubernetes.io/name: my-app
   app.kubernetes.io/version: "1.0.0"
 ```
