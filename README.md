@@ -347,7 +347,12 @@ jobs:
       run: kubectl apply -k overlays/dev
 ```
 
+#### Step 5.4: Add Secrets to GitHub 
+   - Go to your GitHub repo → Settings → Secrets → Actions.
+   - Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from your AWS account.
 
+
+   
 ## Step 6: - Test the CI/CD Pipeline
 
 - Change the dev overlay, set replicas: 2 in overlays/dev/patch.yaml
