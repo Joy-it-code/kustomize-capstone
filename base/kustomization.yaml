@@ -8,5 +8,4 @@ resources:
 labels:
 - includeSelectors: true
   pairs:
-    app.kubernetes.io/name: my-app
-    app.kubernetes.io/version: 1.0.0
+    app: my-app

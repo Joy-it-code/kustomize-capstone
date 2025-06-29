@@ -562,45 +562,36 @@ kubectl kustomize overlays/dev
 
 #### Deploy to EKS:
 ```bash
-kubectl apply -k overlays/dev
+kubectl apply -k overlays/dev --namespace dev
 ```
 
 #### Verify Deployment:
 ```bash
-kubectl get pods -n default
-kubectl get svc -n default
+kubectl get pods -n dev
+kubectl get svc -n dev
 ```
+![](./img/3a.apply.dev.png)
 
 
-#### - Test Locally for `overlays/staging`:
-```bash
-kubectl kustomize overlays/staging
-```
 
-#### Deploy to EKS:
-```bash
-kubectl apply -k overlays/staging
-```
+#### - Test Locally for `staging`:
+
 
 #### Verify Deployment:
 ```bash
-kubectl get pods -n default
-kubectl get svc -n default
+kubectl get pods -n staging
+kubectl get svc -n staging
 ```
+![](./img/3b.pod.for.staging.png)
 
 
-#### - Test Locally for `overlays/prod`:
-```bash
-kubectl kustomize overlays/prod
-```
 
-#### Deploy to EKS:
-```bash
-kubectl apply -k overlays/prod
-```
+#### - Test Locally for `prod`:
+
 
 #### Verify Deployment:
 ```bash
-kubectl get pods -n default
-kubectl get svc -n default
+kubectl get pods -n prod
+kubectl get svc -n prod
 ```
+![](./img/3c.pod.for.prod.png)
