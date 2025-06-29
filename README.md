@@ -417,10 +417,28 @@ git push origin main
 ```
 
 
+## Check if it Worked:
+
+- Go to your GitHub repo → Actions.
+- Watch the “Deploy to EKS” run and check the logs.
+- Look for success messages for all three environments.
+![](./img/2d.deply.every.png)
+
+
+### Verify in EKS:
+```bash
+kubectl get pods -n dev
+kubectl get pods -n staging
+kubectl get pods -n prod
+```
+![](./img/2e.get.all.pods.png)
+
+
+
 
 ## Task 7: Manage Secrets and ConfigMaps
 
-#### - Create base/configmap.yaml:
+#### - Create `base/configmap.yaml`:
 ```bash
 touch base/configmap.yaml
 ```
@@ -435,7 +453,7 @@ data:
   APP_NAME: "My Web App"
 ```
 
-#### Create base/secret.yaml:
+#### Create `base/secret.yaml`:
 ```bash
 apiVersion: v1
 kind: Secret
@@ -446,3 +464,143 @@ data:
   API_KEY: YXBpLWtleS1leGFtcGxlCg==
 ```
 
+
+#### Update `base/kustomization.yaml`:
+```bash
+- configmap.yaml
+  - secret.yaml
+```
+
+#### Update `base/deployment.yaml` to use ConfigMap and Secret:
+
+```bash
+env:
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: APP_NAME
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: my-app-secret
+              key: API_KEY
+```
+
+
+#### Update overlays to customize (e.g., add a ConfigMap entry in dev):
+
+`overlays/dev/patch.yaml`
+
+```
+        - name: DEBUG
+          value: "true"
+```
+
+#### Update base/kustomization
+```bash
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+  - secret.yaml
+commonLabels:
+  app.kubernetes.io/name: my-app
+  app.kubernetes.io/version: "1.0.0"
+```
+
+
+
+#### Update `overlays/dev/kustomization.yaml`
+```bash
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+  - ../../base
+patchesStrategicMerge:
+  - patch.yaml
+configMapGenerator:
+  - name: my-app-dev-config
+    literals:
+      - LOG_LEVEL=debug
+```
+
+
+#### Update `overlays/dev/patch.yaml`
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: my-app
+        env:
+        - name: ENVIRONMENT
+          value: "development"
+        - name: DEBUG
+          value: "true"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-dev-config
+              key: LOG_LEVEL
+```
+
+
+#### Deploy the Application Using Kustomize
+
+- Test Locally for `overlays/dev`:
+```bash
+kubectl kustomize overlays/dev
+```
+
+#### Deploy to EKS:
+```bash
+kubectl apply -k overlays/dev
+```
+
+#### Verify Deployment:
+```bash
+kubectl get pods -n default
+kubectl get svc -n default
+```
+
+
+#### - Test Locally for `overlays/staging`:
+```bash
+kubectl kustomize overlays/staging
+```
+
+#### Deploy to EKS:
+```bash
+kubectl apply -k overlays/staging
+```
+
+#### Verify Deployment:
+```bash
+kubectl get pods -n default
+kubectl get svc -n default
+```
+
+
+#### - Test Locally for `overlays/prod`:
+```bash
+kubectl kustomize overlays/prod
+```
+
+#### Deploy to EKS:
+```bash
+kubectl apply -k overlays/prod
+```
+
+#### Verify Deployment:
+```bash
+kubectl get pods -n default
+kubectl get svc -n default
+```

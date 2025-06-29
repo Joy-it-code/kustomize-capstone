@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: my-app
 spec:
-  replicas: 3
+  replicas: 2
   template:
     spec:
       containers:
@@ -11,3 +11,10 @@ spec:
         env:
         - name: ENVIRONMENT
           value: "development"
+        - name: DEBUG
+          value: "true"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-dev-config
+              key: LOG_LEVEL

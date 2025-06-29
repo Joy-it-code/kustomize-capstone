@@ -17,3 +17,14 @@ spec:
         image: nginx:latest
         ports:
         - containerPort: 80
+        env:
+        - name: APP_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: my-app-config
+              key: APP_NAME
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: my-app-secret
+              key: API_KEY
