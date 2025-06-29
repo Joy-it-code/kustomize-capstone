@@ -18,8 +18,8 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-west-2
+        aws-region: us-east-1
     - name: Update kubeconfig
-      run: aws eks update-kubeconfig --name my-eks-cluster --region us-west-2
+      run: aws eks update-kubeconfig --name my-eks-cluster --region us-east-1
     - name: Deploy to EKS (Dev)
       run: kubectl apply -k overlays/dev

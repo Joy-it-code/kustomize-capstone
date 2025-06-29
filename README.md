@@ -352,7 +352,7 @@ jobs:
    - Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from your AWS account.
 
 
-   
+
 ## Step 6: - Test the CI/CD Pipeline
 
 - Change the dev overlay, set replicas: 2 in overlays/dev/patch.yaml
@@ -364,7 +364,7 @@ replicas: 2
 ```bash
 git add .
 git commit -m "Increase replicas in dev to 2"
-git push origin main
+git push
 ```
 
 #### - Check GitHub Actions:
