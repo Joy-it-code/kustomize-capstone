@@ -370,12 +370,52 @@ git push
 #### - Check GitHub Actions:
   - Go to your GitHub repo → Actions.
   - See if the “Deploy to EKS” job runs successfully.
+![](./img/2b.deployed.eks.dev.png)
 
 
 - Verify in EKS:
 ```bash
 kubectl get pods -n default
 ```
+![](./img/2c.kube.get.dev.png)
+
+
+
+
+## Update GitHub Actions workflow to deploy all environments (`dev, staging, prod`)
+`.github/workflows/deploy.yaml` 
+```bash
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name my-eks-cluster --region us-east-1
+    - name: Create namespaces
+      run: |
+        kubectl create namespace dev || true
+        kubectl create namespace staging || true
+        kubectl create namespace prod || true
+    - name: Deploy to EKS (Dev)
+      run: kubectl apply -k overlays/dev --namespace dev
+    - name: Deploy to EKS (Staging)
+      run: kubectl apply -k overlays/staging --namespace staging
+    - name: Deploy to EKS (Prod)
+      run: kubectl apply -k overlays/prod --namespace prod
+```
+
+
+## Testing the Updated Workflow
+
+`overlays/dev/patch.yaml`, Increase dev:
+```bash
+  replicas: 3
+```
+
+
+## Push the Changes:
+```bash
+git add .
+git commit -m "Increase dev replicas to 3"
+git push origin main
+```
+
 
 
 ## Task 7: Manage Secrets and ConfigMaps

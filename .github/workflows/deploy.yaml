@@ -21,5 +21,14 @@ jobs:
         aws-region: us-east-1
     - name: Update kubeconfig
       run: aws eks update-kubeconfig --name my-eks-cluster --region us-east-1
+    - name: Create namespaces
+      run: |
+        kubectl create namespace dev || true
+        kubectl create namespace staging || true
+        kubectl create namespace prod || true
     - name: Deploy to EKS (Dev)
-      run: kubectl apply -k overlays/dev
+      run: kubectl apply -k overlays/dev --namespace dev
+    - name: Deploy to EKS (Staging)
+      run: kubectl apply -k overlays/staging --namespace staging
+    - name: Deploy to EKS (Prod)
+      run: kubectl apply -k overlays/prod --namespace prod
